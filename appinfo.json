@@ -1,0 +1,118 @@
+{
+  "uuid": "9c9795cd-6f96-483d-9a20-d1619deb0fc4",
+  "shortName": "Watch & Learn",
+  "longName": "Watch & Learn App",
+  "companyName": "PebbLiz Technologies LLC",
+  "versionCode": 1,
+  "versionLabel": "1.0.0",
+  "watchapp": {
+    "watchface": true
+  },
+  "appKeys": {
+    "dummy": 0
+  },
+  "resources": {
+    "media": [
+      {
+        "type": "png",
+        "name": "IMAGE_ILE_FRONT",
+        "file": "images/ile_front.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_ILE_BACK",
+        "file": "images/ile_back.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_ALA_FRONT",
+        "file": "images/ala_front.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_ALA_BACK",
+        "file": "images/ala_back.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_ARG_FRONT",
+        "file": "images/arg_front.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_ARG_BACK",
+        "file": "images/arg_back.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_ASP_FRONT",
+        "file": "images/asp_front.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_ASP_BACK",
+        "file": "images/asp_back.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_CYS_FRONT",
+        "file": "images/cys_front.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_CYS_BACK",
+        "file": "images/cys_back.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_GLU_FRONT",
+        "file": "images/glu_front.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_GLU_BACK",
+        "file": "images/glu_back.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_GLY_FRONT",
+        "file": "images/gly_front.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_GLY_BACK",
+        "file": "images/gly_back.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_HIS_FRONT",
+        "file": "images/his_front.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_HIS_BACK",
+        "file": "images/his_back.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_LEU_FRONT",
+        "file": "images/leu_front.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_LEU_BACK",
+        "file": "images/leu_back.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_LYS_FRONT",
+        "file": "images/lys_front.png"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_LYS_BACK",
+        "file": "images/lys_back.png"
+      }
+    ]
+  }
+}
