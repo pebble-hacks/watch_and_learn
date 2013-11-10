@@ -2,13 +2,4 @@
 .lock-waf_darwin_build
 
 # Ignore build generated files
-build/*.pbpack*
-build/src
-build/*.elf
-build/*.map
-build/*.bin
-build/*.auto*
-build/*.log
-build/.wafpickle-darwin-34014704-98
-build/c4che
-build/resources
+build/
