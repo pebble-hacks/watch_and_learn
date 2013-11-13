@@ -1,11 +1,7 @@
 #include "cards.h"
 
 // Enums
-enum side_et {
-  FRONT, BACK
-};
-
-enum card_et {
+enum card_t {
   ILE = 0, ALA, ARG, ASP, CYS,
   GLU, GLY, HIS, LEU, LYS,
   MET, GLN, PHE, PRO, SER,
@@ -13,8 +9,8 @@ enum card_et {
 };
 
 // Globals
-static enum side_et current_side;
-static enum card_et current_card;
+static enum side_t current_side;
+static enum card_t current_card;
 static Window *window;
 static GBitmap *image_front;
 static BitmapLayer *image_layer_front;
@@ -52,7 +48,7 @@ void deinit_cards(void) {
   text_layer_destroy(card_back.pKa);
 }
 
-void flip_card(void) {
+enum side_t flip_card(void) {
   if(current_side == FRONT) {
     layer_set_hidden((Layer*)image_layer_front, true);
     show_card_back_text();
@@ -62,6 +58,8 @@ void flip_card(void) {
     hide_card_back_text();
     current_side = FRONT;
   }
+
+  return (current_side);
 }
 
 void next_card(void) {

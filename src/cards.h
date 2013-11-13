@@ -5,6 +5,11 @@
 
 #define TOTAL_CARDS (20)
 
+// Enums
+enum side_t {
+  FRONT, BACK
+};
+
 // Struct to hold text_layers
 typedef struct CardBackStruct {
   TextLayer *full_name;
@@ -20,7 +25,7 @@ extern void init_cards(Window *main_window,
                        BitmapLayer *main_image_layer_front,
                        CardBack_t main_card_back);
 extern void deinit_cards(void);
-extern void flip_card(void);
+extern enum side_t flip_card(void);
 extern void next_card(void);
 extern void prev_card(void);
 
