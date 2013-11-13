@@ -34,7 +34,7 @@ static void accel_tap_handler(AccelAxisType axis, int32_t direction) {
 static void window_load(Window *window) {
   init_cards(window, image_front, image_layer_front, card_back);
 
-  time_layer = text_layer_create(GRect(95, 0, 50, 28));
+  time_layer = text_layer_create(GRect(93, 0, 50, 28));
   text_layer_set_text_color(time_layer, GColorWhite);
   text_layer_set_background_color(time_layer, GColorClear);
   text_layer_set_font(time_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));

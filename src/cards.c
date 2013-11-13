@@ -26,7 +26,7 @@ void init_cards(Window *main_window,
                 CardBack_t main_card_back)
 {
   current_side = FRONT;
-  current_card = ILE;
+  current_card = TYR;
   window = main_window;
   image_front = main_image_front;
   image_layer_front = main_image_layer_front;
@@ -172,11 +172,11 @@ void free_card_image(void) {
 void init_card_text(void)
 {
   // Create the various text layers
-  card_back.full_name  = text_layer_create(GRect(1, 25, 150, 25));
-  card_back.tla_name   = text_layer_create(GRect(1, 55, 150, 25));
-  card_back.polarized  = text_layer_create(GRect(1, 85, 150, 25));
-  card_back.func_group = text_layer_create(GRect(1, 115, 150, 25));
-  card_back.pKa        = text_layer_create(GRect(1, 145, 150, 25));
+  card_back.full_name  = text_layer_create(GRect(0, 30, 150, 32));
+  card_back.tla_name   = text_layer_create(GRect(0, 55, 150, 32));
+  card_back.polarized  = text_layer_create(GRect(0, 88, 150, 28));
+  card_back.func_group = text_layer_create(GRect(0, 118, 150, 28));
+  card_back.pKa        = text_layer_create(GRect(0, 140, 150, 28));
 
   // Set text colors
   text_layer_set_text_color(card_back.full_name, GColorBlack);
@@ -193,11 +193,11 @@ void init_card_text(void)
   text_layer_set_background_color(card_back.pKa, GColorClear);
 
   // Set fonts
-  text_layer_set_font(card_back.full_name, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
-  text_layer_set_font(card_back.tla_name, fonts_get_system_font(FONT_KEY_GOTHIC_18));
-  text_layer_set_font(card_back.polarized, fonts_get_system_font(FONT_KEY_GOTHIC_18));
-  text_layer_set_font(card_back.func_group, fonts_get_system_font(FONT_KEY_GOTHIC_18));
-  text_layer_set_font(card_back.pKa, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+  text_layer_set_font(card_back.full_name, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
+  text_layer_set_font(card_back.tla_name, fonts_get_system_font(FONT_KEY_GOTHIC_28));
+  text_layer_set_font(card_back.polarized, fonts_get_system_font(FONT_KEY_GOTHIC_24));
+  text_layer_set_font(card_back.func_group, fonts_get_system_font(FONT_KEY_GOTHIC_24));
+  text_layer_set_font(card_back.pKa, fonts_get_system_font(FONT_KEY_GOTHIC_24));
 
   // Text alignment
   text_layer_set_text_alignment(card_back.full_name, GTextAlignmentCenter);
