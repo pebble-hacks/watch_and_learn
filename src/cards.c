@@ -1,16 +1,11 @@
+#include "amino_acids.h"
 #include "cards.h"
 
-// Enums
-enum card_t {
-  ILE = 0, ALA, ARG, ASP, CYS,
-  GLU, GLY, HIS, LEU, LYS,
-  MET, GLN, PHE, PRO, SER,
-  THR, TRP, ASN, TYR, VAL
-};
+#define NUMBER_OF_CARDS  (NUMBER_OF_AMINO_ACIDS)
 
 // Globals
 static enum side_t current_side;
-static enum card_t current_card;
+static enum amino_acid_t current_card;
 static Window *window;
 static GBitmap *image_front;
 static BitmapLayer *image_layer_front;
@@ -18,11 +13,12 @@ static CardBack_t card_back;
 
 // Private functions
 static void load_card(void);
-static void load_card_images(void);
-static void free_card_images(void);
-static void load_card_back_text(void);
-static void show_card_back_text(void);
-static void hide_card_back_text(void);
+static void load_card_image(void);
+static void free_card_image(void);
+static void init_card_text(void);
+static void show_card_text(void);
+static void hide_card_text(void);
+static void load_card_text(enum amino_acid_t aa);
 
 void init_cards(Window *main_window,
                 GBitmap *main_image_front,
@@ -35,12 +31,12 @@ void init_cards(Window *main_window,
   image_front = main_image_front;
   image_layer_front = main_image_layer_front;
   card_back = main_card_back;
-  load_card_back_text();
+  init_card_text();
   load_card();
 }
 
 void deinit_cards(void) {
-  free_card_images();
+  free_card_image();
   text_layer_destroy(card_back.full_name);
   text_layer_destroy(card_back.tla_name);
   text_layer_destroy(card_back.polarized);
@@ -51,11 +47,11 @@ void deinit_cards(void) {
 enum side_t flip_card(void) {
   if(current_side == FRONT) {
     layer_set_hidden((Layer*)image_layer_front, true);
-    show_card_back_text();
+    show_card_text();
     current_side = BACK;
   } else {
     layer_set_hidden((Layer *)image_layer_front, false);
-    hide_card_back_text();
+    hide_card_text();
     current_side = FRONT;
   }
 
@@ -63,9 +59,9 @@ enum side_t flip_card(void) {
 }
 
 void next_card(void) {
-  free_card_images();
+  free_card_image();
 
-  if (++current_card == TOTAL_CARDS) {
+  if (++current_card == NUMBER_OF_CARDS) {
     current_card = 0;
   }
 
@@ -73,10 +69,10 @@ void next_card(void) {
 }
 
 void prev_card(void) {
-  free_card_images();
+  free_card_image();
 
   if (current_card == 0) {
-    current_card = TOTAL_CARDS;
+    current_card = NUMBER_OF_CARDS;
   }
   --current_card;
 
@@ -90,17 +86,11 @@ void load_card(void) {
     layer_remove_from_parent((Layer*)image_layer_front);
   }
 
-  load_card_images();
-  GRect bounds = layer_get_bounds(window_get_root_layer(window));
-
-  // Front card image
-  image_layer_front = bitmap_layer_create(bounds);
-  bitmap_layer_set_bitmap(image_layer_front, image_front);
-  bitmap_layer_set_alignment(image_layer_front, GAlignCenter);
-  layer_add_child(window_get_root_layer(window), (Layer*)image_layer_front);
+  load_card_image();
+  load_card_text(current_card);
 }
 
-void load_card_images(void) {
+void load_card_image(void) {
   switch(current_card) {
   case ILE:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ILE_FRONT);
@@ -166,14 +156,20 @@ void load_card_images(void) {
     current_card = ILE;
     break;
   }
+
+  GRect bounds = layer_get_bounds(window_get_root_layer(window));
+  image_layer_front = bitmap_layer_create(bounds);
+  bitmap_layer_set_bitmap(image_layer_front, image_front);
+  bitmap_layer_set_alignment(image_layer_front, GAlignCenter);
+  layer_add_child(window_get_root_layer(window), (Layer*)image_layer_front);
 }
 
-void free_card_images(void) {
+void free_card_image(void) {
   gbitmap_destroy(image_front);
   bitmap_layer_destroy(image_layer_front);
 }
 
-void load_card_back_text(void)
+void init_card_text(void)
 {
   // Create the various text layers
   card_back.full_name  = text_layer_create(GRect(1, 25, 150, 25));
@@ -210,13 +206,6 @@ void load_card_back_text(void)
   text_layer_set_text_alignment(card_back.func_group, GTextAlignmentCenter);
   text_layer_set_text_alignment(card_back.pKa, GTextAlignmentCenter);
 
-  // Set text
-  text_layer_set_text(card_back.full_name, "Full Name");
-  text_layer_set_text(card_back.tla_name, "TLA Name");
-  text_layer_set_text(card_back.polarized, "Polarized ?");
-  text_layer_set_text(card_back.func_group, "Func Group");
-  text_layer_set_text(card_back.pKa, "pKa");
-
   // Add as child layers to window root
   layer_add_child(window_get_root_layer(window), (Layer*)card_back.full_name);
   layer_add_child(window_get_root_layer(window), (Layer*)card_back.tla_name);
@@ -225,7 +214,7 @@ void load_card_back_text(void)
   layer_add_child(window_get_root_layer(window), (Layer*)card_back.pKa);
 }
 
-void show_card_back_text(void)
+void show_card_text(void)
 {
   layer_set_hidden((Layer*)card_back.full_name, false);
   layer_set_hidden((Layer*)card_back.tla_name, false);
@@ -234,11 +223,20 @@ void show_card_back_text(void)
   layer_set_hidden((Layer*)card_back.pKa, false);
 }
 
-void hide_card_back_text(void)
+void hide_card_text(void)
 {
   layer_set_hidden((Layer*)card_back.full_name, true);
   layer_set_hidden((Layer*)card_back.tla_name, true);
   layer_set_hidden((Layer*)card_back.polarized, true);
   layer_set_hidden((Layer*)card_back.func_group, true);
   layer_set_hidden((Layer*)card_back.pKa, true);
+}
+
+void load_card_text(enum amino_acid_t aa)
+{
+  text_layer_set_text(card_back.full_name, aa_full_name[aa]);
+  text_layer_set_text(card_back.tla_name, aa_tla_name[aa]);
+  text_layer_set_text(card_back.polarized, aa_polarized[aa]);
+  text_layer_set_text(card_back.func_group, aa_func_group[aa]);
+  text_layer_set_text(card_back.pKa, aa_pKa[aa]);
 }

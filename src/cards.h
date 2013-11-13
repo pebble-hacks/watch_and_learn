@@ -3,8 +3,6 @@
 
 #include <pebble.h>
 
-#define TOTAL_CARDS (20)
-
 // Enums
 enum side_t {
   FRONT, BACK
