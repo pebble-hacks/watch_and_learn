@@ -5,11 +5,10 @@
 
 static Window *window;
 static GBitmap *image_front;
-static GBitmap *image_back;
 static BitmapLayer *image_layer_front;
-static BitmapLayer *image_layer_back;
 static TextLayer *time_layer;
 static uint8_t seconds_tick = 0;
+static CardBack_t card_back;
 
 static void tick_timer_handler(struct tm *tick_time, TimeUnits units_changed) {
   static char time_text[] = "00:00"; // Needs to be static because it's used by the system later.
@@ -18,7 +17,8 @@ static void tick_timer_handler(struct tm *tick_time, TimeUnits units_changed) {
   text_layer_set_text(time_layer, time_text);
   if (!(tick_time->tm_sec % UNIT_INTERVAL)) {
     next_card();
-    layer_add_child(window_get_root_layer(window), text_layer_get_layer(time_layer));
+    layer_remove_from_parent((Layer*)time_layer);
+    layer_add_child(window_get_root_layer(window), (Layer*)time_layer);
   }
 }
 
@@ -27,17 +27,18 @@ static void accel_tap_handler(AccelAxisType axis, int32_t direction) {
 }
 
 static void window_load(Window *window) {
-  init_cards(window, image_front, image_back,
-            image_layer_front, image_layer_back);
+  init_cards(window, image_front, image_layer_front, card_back);
 
-  time_layer = text_layer_create(GRect(95, 0, 144-40 /* width */, 168-54 /* height */));
+  time_layer = text_layer_create(GRect(95, 0, 50, 24));
   text_layer_set_text_color(time_layer, GColorWhite);
   text_layer_set_background_color(time_layer, GColorClear);
   text_layer_set_font(time_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-  layer_add_child(window_get_root_layer(window), text_layer_get_layer(time_layer));
+  text_layer_set_text_alignment(time_layer, GTextAlignmentCenter);
+  layer_add_child(window_get_root_layer(window), (Layer*)time_layer);
 }
 
 static void window_unload(Window *window) {
+  text_layer_destroy(time_layer);
   deinit_cards();
 }
 

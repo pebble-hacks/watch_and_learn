@@ -16,46 +16,50 @@ enum card_et {
 static enum side_et current_side;
 static enum card_et current_card;
 static Window *window;
-static Layer *window_layer;
 static GBitmap *image_front;
-static GBitmap *image_back;
 static BitmapLayer *image_layer_front;
-static BitmapLayer *image_layer_back;
+static CardBack_t card_back;
 
 // Private functions
 static void load_card(void);
 static void load_card_images(void);
 static void free_card_images(void);
+static void load_card_back_text(void);
+static void show_card_back_text(void);
+static void hide_card_back_text(void);
 
 void init_cards(Window *main_window,
                 GBitmap *main_image_front,
-                GBitmap *main_image_back,
                 BitmapLayer *main_image_layer_front,
-                BitmapLayer *main_image_layer_back)
+                CardBack_t main_card_back)
 {
   current_side = FRONT;
   current_card = ILE;
   window = main_window;
-  window_layer = window_get_root_layer(window);
   image_front = main_image_front;
-  image_back = main_image_back;
   image_layer_front = main_image_layer_front;
-  image_layer_back = main_image_layer_back;
+  card_back = main_card_back;
+  load_card_back_text();
   load_card();
 }
 
 void deinit_cards(void) {
   free_card_images();
+  text_layer_destroy(card_back.full_name);
+  text_layer_destroy(card_back.tla_name);
+  text_layer_destroy(card_back.polarized);
+  text_layer_destroy(card_back.func_group);
+  text_layer_destroy(card_back.pKa);
 }
 
 void flip_card(void) {
   if(current_side == FRONT) {
-    layer_set_hidden(bitmap_layer_get_layer(image_layer_front), true);
-    layer_set_hidden(bitmap_layer_get_layer(image_layer_back), false);
+    layer_set_hidden((Layer*)image_layer_front, true);
+    show_card_back_text();
     current_side = BACK;
   } else {
-    layer_set_hidden(bitmap_layer_get_layer(image_layer_back), true);
-    layer_set_hidden(bitmap_layer_get_layer(image_layer_front), false);
+    layer_set_hidden((Layer *)image_layer_front, false);
+    hide_card_back_text();
     current_side = FRONT;
   }
 }
@@ -82,102 +86,84 @@ void prev_card(void) {
 }
 
 void load_card(void) {
-  layer_remove_child_layers(window_layer);
+
+  // Remove the image layer from the parent
+  if (bitmap_layer_get_layer(image_layer_front)) {
+    layer_remove_from_parent((Layer*)image_layer_front);
+  }
+
   load_card_images();
-  GRect bounds = layer_get_bounds(window_layer);
+  GRect bounds = layer_get_bounds(window_get_root_layer(window));
+
+  // Front card image
   image_layer_front = bitmap_layer_create(bounds);
-  image_layer_back = bitmap_layer_create(bounds);
   bitmap_layer_set_bitmap(image_layer_front, image_front);
   bitmap_layer_set_alignment(image_layer_front, GAlignCenter);
-  layer_add_child(window_layer, bitmap_layer_get_layer(image_layer_front));
-  bitmap_layer_set_bitmap(image_layer_back, image_back);
-  bitmap_layer_set_alignment(image_layer_back, GAlignCenter);
-  layer_add_child(window_layer, bitmap_layer_get_layer(image_layer_back));
-  layer_set_hidden(bitmap_layer_get_layer(image_layer_back), true);
+  layer_add_child(window_get_root_layer(window), (Layer*)image_layer_front);
 }
 
 void load_card_images(void) {
   switch(current_card) {
   case ILE:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ILE_FRONT);
-    image_back = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ILE_BACK);
     break;
   case ALA:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALA_FRONT);
-    image_back = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ALA_BACK);
     break;
   case ARG:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ARG_FRONT);
-    image_back = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ARG_BACK);
     break;
   case ASP:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ASP_FRONT);
-    image_back = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ASP_BACK);
     break;
   case CYS:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_CYS_FRONT);
-    image_back = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_CYS_BACK);
     break;
   case GLU:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_GLU_FRONT);
-    image_back = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_GLU_BACK);
     break;
   case GLY:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_GLY_FRONT);
-    image_back = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_GLY_BACK);
     break;
   case HIS:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_HIS_FRONT);
-    image_back = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_HIS_BACK);
     break;
   case LEU:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_LEU_FRONT);
-    image_back = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_LEU_BACK);
     break;
   case LYS:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_LYS_FRONT);
-    image_back = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_LYS_BACK);
     break;
   /*
   case MET:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_MET_FRONT);
-    image_back = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_MET_BACK);
     break;
   case GLN:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_GLN_FRONT);
-    image_back = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_GLN_BACK);
     break;
   case PHE:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_PHE_FRONT);
-    image_back = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_PHE_BACK);
     break;
   case PRO:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_PRO_FRONT);
-    image_back = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_PRO_BACK);
     break;
   case SER:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SER_FRONT);
-    image_back = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SER_BACK);
     break;
   case THR:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_THR_FRONT);
-    image_back = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_THR_BACK);
     break;
   case TRP:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_TRP_FRONT);
-    image_back = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_TRP_BACK);
     break;
   case ASN:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ASN_FRONT);
-    image_back = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ASN_BACK);
     break;
   case TYR:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_TYR_FRONT);
-    image_back = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_TYR_BACK);
     break;
   case VAL:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_VAL_FRONT);
-    image_back = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_VAL_BACK);
     break;
   */
   default:
@@ -188,8 +174,75 @@ void load_card_images(void) {
 
 void free_card_images(void) {
   gbitmap_destroy(image_front);
-  gbitmap_destroy(image_back);
   bitmap_layer_destroy(image_layer_front);
-  bitmap_layer_destroy(image_layer_back);
 }
 
+void load_card_back_text(void)
+{
+  // Create the various text layers
+  card_back.full_name  = text_layer_create(GRect(1, 25, 150, 25));
+  card_back.tla_name   = text_layer_create(GRect(1, 55, 150, 25));
+  card_back.polarized  = text_layer_create(GRect(1, 85, 150, 25));
+  card_back.func_group = text_layer_create(GRect(1, 115, 150, 25));
+  card_back.pKa        = text_layer_create(GRect(1, 145, 150, 25));
+
+  // Set text colors
+  text_layer_set_text_color(card_back.full_name, GColorBlack);
+  text_layer_set_text_color(card_back.tla_name, GColorBlack);
+  text_layer_set_text_color(card_back.polarized, GColorBlack);
+  text_layer_set_text_color(card_back.func_group, GColorBlack);
+  text_layer_set_text_color(card_back.pKa, GColorBlack);
+
+  // Set background colors
+  text_layer_set_background_color(card_back.full_name, GColorClear);
+  text_layer_set_background_color(card_back.tla_name, GColorClear);
+  text_layer_set_background_color(card_back.polarized, GColorClear);
+  text_layer_set_background_color(card_back.func_group, GColorClear);
+  text_layer_set_background_color(card_back.pKa, GColorClear);
+
+  // Set fonts
+  text_layer_set_font(card_back.full_name, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+  text_layer_set_font(card_back.tla_name, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+  text_layer_set_font(card_back.polarized, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+  text_layer_set_font(card_back.func_group, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+  text_layer_set_font(card_back.pKa, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+
+  // Text alignment
+  text_layer_set_text_alignment(card_back.full_name, GTextAlignmentCenter);
+  text_layer_set_text_alignment(card_back.tla_name, GTextAlignmentCenter);
+  text_layer_set_text_alignment(card_back.polarized, GTextAlignmentCenter);
+  text_layer_set_text_alignment(card_back.func_group, GTextAlignmentCenter);
+  text_layer_set_text_alignment(card_back.pKa, GTextAlignmentCenter);
+
+  // Set text
+  text_layer_set_text(card_back.full_name, "Full Name");
+  text_layer_set_text(card_back.tla_name, "TLA Name");
+  text_layer_set_text(card_back.polarized, "Polarized ?");
+  text_layer_set_text(card_back.func_group, "Func Group");
+  text_layer_set_text(card_back.pKa, "pKa");
+
+  // Add as child layers to window root
+  layer_add_child(window_get_root_layer(window), (Layer*)card_back.full_name);
+  layer_add_child(window_get_root_layer(window), (Layer*)card_back.tla_name);
+  layer_add_child(window_get_root_layer(window), (Layer*)card_back.polarized);
+  layer_add_child(window_get_root_layer(window), (Layer*)card_back.func_group);
+  layer_add_child(window_get_root_layer(window), (Layer*)card_back.pKa);
+}
+
+void show_card_back_text(void)
+{
+  layer_set_hidden((Layer*)card_back.full_name, false);
+  layer_set_hidden((Layer*)card_back.tla_name, false);
+  layer_set_hidden((Layer*)card_back.polarized, false);
+  layer_set_hidden((Layer*)card_back.func_group, false);
+  layer_set_hidden((Layer*)card_back.pKa, false);
+}
+
+void hide_card_back_text(void)
+{
+  layer_set_hidden((Layer*)card_back.full_name, true);
+  layer_set_hidden((Layer*)card_back.tla_name, true);
+  layer_set_hidden((Layer*)card_back.polarized, true);
+  layer_set_hidden((Layer*)card_back.func_group, true);
+  layer_set_hidden((Layer*)card_back.pKa, true);
+}

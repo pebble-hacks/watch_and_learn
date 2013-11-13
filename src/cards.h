@@ -5,12 +5,20 @@
 
 #define TOTAL_CARDS (10)
 
+// Struct to hold text_layers
+typedef struct CardBackStruct {
+  TextLayer *full_name;
+  TextLayer *tla_name;
+  TextLayer *polarized;
+  TextLayer *func_group;
+  TextLayer *pKa;
+} CardBack_t;
+
 // Public functions
 extern void init_cards(Window *main_window,
                        GBitmap *main_image_front,
-                       GBitmap *main_image_back,
                        BitmapLayer *main_image_layer_front,
-                       BitmapLayer *main_image_layer_back);
+                       CardBack_t main_card_back);
 extern void deinit_cards(void);
 extern void flip_card(void);
 extern void next_card(void);
