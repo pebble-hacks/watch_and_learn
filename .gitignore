@@ -1,5 +1,6 @@
 .DS_Store
 .lock-waf_darwin_build
+*.swp
 
 # Ignore build generated files
 build/
