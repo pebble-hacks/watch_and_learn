@@ -134,7 +134,6 @@ void load_card_images(void) {
   case LYS:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_LYS_FRONT);
     break;
-  /*
   case MET:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_MET_FRONT);
     break;
@@ -165,7 +164,6 @@ void load_card_images(void) {
   case VAL:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_VAL_FRONT);
     break;
-  */
   default:
     current_card = ILE;
     break;

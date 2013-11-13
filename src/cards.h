@@ -3,7 +3,7 @@
 
 #include <pebble.h>
 
-#define TOTAL_CARDS (10)
+#define TOTAL_CARDS (20)
 
 // Struct to hold text_layers
 typedef struct CardBackStruct {
