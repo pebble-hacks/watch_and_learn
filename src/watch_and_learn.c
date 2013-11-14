@@ -1,7 +1,9 @@
 #include <pebble.h>
 #include "cards.h"
 
-#define UNIT_INTERVAL (15)
+#define NEXT_INTERVAL   (15)    // seconds
+#define HYS_THRESHOLD   (750)   // mg
+#define FLIP_THRESHOLD  (1000)  // mg
 
 static Window *window;
 static GBitmap *image_front;
@@ -15,7 +17,7 @@ static void tick_timer_handler(struct tm *tick_time, TimeUnits units_changed) {
   strftime(time_text, sizeof(time_text), "%R", tick_time);
 
   text_layer_set_text(time_layer, time_text);
-  if (!(tick_time->tm_sec % UNIT_INTERVAL)) {
+  if (!(tick_time->tm_sec % NEXT_INTERVAL)) {
     rand_card();
     text_layer_set_text_color(time_layer, GColorWhite);
     layer_remove_from_parent((Layer*)time_layer);
@@ -23,11 +25,26 @@ static void tick_timer_handler(struct tm *tick_time, TimeUnits units_changed) {
   }
 }
 
-static void accel_tap_handler(AccelAxisType axis, int32_t direction) {
-  if (flip_card() == BACK) {
-    text_layer_set_text_color(time_layer, GColorBlack);
-  } else {
-    text_layer_set_text_color(time_layer, GColorWhite);
+static void accel_data_handler(AccelData *data, uint32_t num_samples) {
+  uint8_t count = 0;
+
+  // Exit if the first two samples are above the threshold
+  if (data->y > HYS_THRESHOLD) {
+    return;
+  }
+
+  for (uint8_t i = 1; i < num_samples; ++i) {
+    if ((data + i)->y > FLIP_THRESHOLD) {
+      ++count;
+    }
+  }
+
+  if (count) {
+    if (flip_card() == BACK) {
+      text_layer_set_text_color(time_layer, GColorBlack);
+    } else {
+      text_layer_set_text_color(time_layer, GColorWhite);
+    }
   }
 }
 
@@ -65,11 +82,12 @@ static void init(void) {
   tick_timer_handler(current_time, SECOND_UNIT);
 
   tick_timer_service_subscribe(SECOND_UNIT, &tick_timer_handler);
-  accel_tap_service_subscribe(&accel_tap_handler);
+  accel_service_set_sampling_rate(ACCEL_SAMPLING_10HZ);
+  accel_data_service_subscribe(10, &accel_data_handler);
 }
 
 static void deinit(void) {
-  accel_tap_service_unsubscribe();
+  accel_data_service_unsubscribe();
   tick_timer_service_unsubscribe();
   window_destroy(window);
 }
