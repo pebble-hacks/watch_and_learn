@@ -25,13 +25,15 @@ void init_cards(Window *main_window,
                 BitmapLayer *main_image_layer_front,
                 CardBack_t main_card_back)
 {
+  srand(time(NULL));
+  current_card = rand() % NUMBER_OF_CARDS;
   current_side = FRONT;
-  current_card = TYR;
   window = main_window;
   image_front = main_image_front;
   image_layer_front = main_image_layer_front;
   card_back = main_card_back;
   init_card_text();
+
   load_card();
 }
 
@@ -79,8 +81,14 @@ void prev_card(void) {
   load_card();
 }
 
-void load_card(void) {
+void rand_card(void) {
+  free_card_image();
+  srand(time(NULL));
+  current_card = rand() % NUMBER_OF_CARDS;
+  load_card();
+}
 
+void load_card(void) {
   // Remove the image layer from the parent
   if (bitmap_layer_get_layer(image_layer_front)) {
     layer_remove_from_parent((Layer*)image_layer_front);
@@ -169,8 +177,7 @@ void free_card_image(void) {
   bitmap_layer_destroy(image_layer_front);
 }
 
-void init_card_text(void)
-{
+void init_card_text(void) {
   // Create the various text layers
   card_back.full_name  = text_layer_create(GRect(0, 30, 150, 32));
   card_back.tla_name   = text_layer_create(GRect(0, 55, 150, 32));
@@ -214,8 +221,7 @@ void init_card_text(void)
   layer_add_child(window_get_root_layer(window), (Layer*)card_back.pKa);
 }
 
-void show_card_text(void)
-{
+void show_card_text(void) {
   layer_set_hidden((Layer*)card_back.full_name, false);
   layer_set_hidden((Layer*)card_back.tla_name, false);
   layer_set_hidden((Layer*)card_back.polarized, false);
@@ -223,8 +229,7 @@ void show_card_text(void)
   layer_set_hidden((Layer*)card_back.pKa, false);
 }
 
-void hide_card_text(void)
-{
+void hide_card_text(void) {
   layer_set_hidden((Layer*)card_back.full_name, true);
   layer_set_hidden((Layer*)card_back.tla_name, true);
   layer_set_hidden((Layer*)card_back.polarized, true);
@@ -232,8 +237,7 @@ void hide_card_text(void)
   layer_set_hidden((Layer*)card_back.pKa, true);
 }
 
-void load_card_text(enum amino_acid_t aa)
-{
+void load_card_text(enum amino_acid_t aa) {
   text_layer_set_text(card_back.full_name, aa_full_name[aa]);
   text_layer_set_text(card_back.tla_name, aa_tla_name[aa]);
   text_layer_set_text(card_back.polarized, aa_polarized[aa]);
