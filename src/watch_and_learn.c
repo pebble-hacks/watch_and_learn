@@ -1,9 +1,8 @@
 #include <pebble.h>
 #include "cards.h"
 
-#define NEXT_INTERVAL   (15)    // seconds
-#define HYS_THRESHOLD   (750)   // mg
-#define FLIP_THRESHOLD  (1000)  // mg
+#define NEXT_INTERVAL  (15)    // seconds
+#define THRESHOLD      (750)   // mg
 
 static Window *window;
 static GBitmap *image_front;
@@ -26,24 +25,44 @@ static void tick_timer_handler(struct tm *tick_time, TimeUnits units_changed) {
 }
 
 static void accel_data_handler(AccelData *data, uint32_t num_samples) {
-  uint8_t count = 0;
+  bool hit = false;
+  uint8_t i = 0;
 
-  // Exit if the first two samples are above the threshold
-  if (data->y > HYS_THRESHOLD) {
-    return;
-  }
+  // Look for +y threshold
+  while (i < num_samples) {
+    if ((data + i)->y > THRESHOLD) {
+      hit = true;;
+    }
 
-  for (uint8_t i = 1; i < num_samples; ++i) {
-    if ((data + i)->y > FLIP_THRESHOLD) {
-      ++count;
+    ++i;
+
+    if (hit) {
+      break;
     }
   }
 
-  if (count) {
-    if (flip_card() == BACK) {
-      text_layer_set_text_color(time_layer, GColorBlack);
-    } else {
-      text_layer_set_text_color(time_layer, GColorWhite);
+  if (!hit) {
+    return;
+  }
+
+  // Reset hit
+  hit = false;;
+
+  // Look for -z threshold
+  while (i < num_samples) {
+    if ((data + i)->z < -THRESHOLD) {
+      hit = true;
+    }
+
+    ++i;
+
+    if (hit) {
+      if (flip_card() == BACK) {
+        text_layer_set_text_color(time_layer, GColorBlack);
+      } else {
+        text_layer_set_text_color(time_layer, GColorWhite);
+      }
+      return;
     }
   }
 }
@@ -82,8 +101,8 @@ static void init(void) {
   tick_timer_handler(current_time, SECOND_UNIT);
 
   tick_timer_service_subscribe(SECOND_UNIT, &tick_timer_handler);
-  accel_service_set_sampling_rate(ACCEL_SAMPLING_10HZ);
-  accel_data_service_subscribe(10, &accel_data_handler);
+  accel_service_set_sampling_rate(ACCEL_SAMPLING_25HZ);
+  accel_data_service_subscribe(14, &accel_data_handler);
 }
 
 static void deinit(void) {
