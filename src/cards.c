@@ -10,6 +10,8 @@ static Window *window;
 static GBitmap *image_front;
 static BitmapLayer *image_layer_front;
 static CardBack_t card_back;
+static bool card_used[NUMBER_OF_CARDS];
+static uint8_t card_counter = NUMBER_OF_CARDS;
 
 // Private functions
 static void load_card(void);
@@ -19,13 +21,14 @@ static void init_card_text(void);
 static void show_card_text(void);
 static void hide_card_text(void);
 static void load_card_text(enum amino_acid_t aa);
+static void reset_card_used(void);
 
 void init_cards(Window *main_window,
                 GBitmap *main_image_front,
                 BitmapLayer *main_image_layer_front,
                 CardBack_t main_card_back)
 {
-  srand(time(NULL));
+  reset_card_used();
   current_card = rand() % NUMBER_OF_CARDS;
   current_side = FRONT;
   window = main_window;
@@ -83,8 +86,11 @@ void prev_card(void) {
 
 void rand_card(void) {
   free_card_image();
-  srand(time(NULL));
-  current_card = rand() % NUMBER_OF_CARDS;
+
+  while (card_used[current_card]) {
+    current_card = rand() % NUMBER_OF_CARDS;
+  }
+
   load_card();
 }
 
@@ -96,6 +102,11 @@ void load_card(void) {
 
   load_card_image();
   load_card_text(current_card);
+  card_used[current_card] = true;
+
+  if (!(--card_counter)) {
+    reset_card_used();
+  }
 }
 
 void load_card_image(void) {
@@ -243,4 +254,13 @@ void load_card_text(enum amino_acid_t aa) {
   text_layer_set_text(card_back.polarized, aa_polarized[aa]);
   text_layer_set_text(card_back.func_group, aa_func_group[aa]);
   text_layer_set_text(card_back.pKa, aa_pKa[aa]);
+}
+
+void reset_card_used(void) {
+  for (uint8_t i = NUMBER_OF_CARDS; i; --i) {
+    card_used[NUMBER_OF_CARDS - i] = false;
+  }
+
+  card_counter = NUMBER_OF_CARDS;
+  srand(time(NULL));
 }
