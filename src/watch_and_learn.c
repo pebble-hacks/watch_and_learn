@@ -2,7 +2,7 @@
 #include "cards.h"
 
 #define NEXT_INTERVAL  (15)    // seconds
-#define THRESHOLD      (1000)  // mg
+#define THRESHOLD      (800)   // mg
 
 static Window *window;
 static GBitmap *image_front;
