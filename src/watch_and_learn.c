@@ -2,7 +2,7 @@
 #include "cards.h"
 
 #define NEXT_INTERVAL  (15)    // seconds
-#define THRESHOLD      (500)   // mg
+#define THRESHOLD      (1000)  // mg
 
 static Window *window;
 static GBitmap *image_front;
@@ -10,6 +10,8 @@ static BitmapLayer *image_layer_front;
 static TextLayer *time_layer;
 static uint8_t seconds_tick = 0;
 static CardBack_t card_back;
+
+static bool flip_detected(AccelData *data, uint32_t num_samples);
 
 static void tick_timer_handler(struct tm *tick_time, TimeUnits units_changed) {
   static char time_text[] = "00:00"; // Needs to be static because it's used by the system later.
@@ -25,45 +27,14 @@ static void tick_timer_handler(struct tm *tick_time, TimeUnits units_changed) {
 }
 
 static void accel_data_handler(AccelData *data, uint32_t num_samples) {
-  bool hit = false;
-  uint8_t i = 0;
-
-  // Look for +y threshold
-  while (i < num_samples) {
-    if ((data + i)->y > THRESHOLD) {
-      hit = true;;
-    }
-
-    ++i;
-
-    if (hit) {
-      break;
-    }
-  }
-
-  if (!hit) {
+  if (!flip_detected(data, num_samples)) {
     return;
   }
 
-  // Reset hit
-  hit = false;;
-
-  // Look for -z threshold
-  while (i < num_samples) {
-    if ((data + i)->z < -THRESHOLD) {
-      hit = true;
-    }
-
-    ++i;
-
-    if (hit) {
-      if (flip_card() == BACK) {
-        text_layer_set_text_color(time_layer, GColorBlack);
-      } else {
-        text_layer_set_text_color(time_layer, GColorWhite);
-      }
-      return;
-    }
+  if (flip_card() == BACK) {
+    text_layer_set_text_color(time_layer, GColorBlack);
+  } else {
+    text_layer_set_text_color(time_layer, GColorWhite);
   }
 }
 
@@ -102,13 +73,40 @@ static void init(void) {
 
   tick_timer_service_subscribe(SECOND_UNIT, &tick_timer_handler);
   accel_service_set_sampling_rate(ACCEL_SAMPLING_25HZ);
-  accel_data_service_subscribe(14, &accel_data_handler);
+  accel_data_service_subscribe(15, &accel_data_handler);
 }
 
 static void deinit(void) {
   accel_data_service_unsubscribe();
   tick_timer_service_unsubscribe();
   window_destroy(window);
+}
+
+bool flip_detected(AccelData *data, uint32_t num_samples) {
+  uint8_t i = 0;
+
+  // Look for +y threshold
+  while (i < num_samples) {
+    if ((data + i)->y > THRESHOLD) {
+      break;
+    }
+    ++i;
+  }
+
+  if (i == num_samples) {
+    return (false);
+  }
+
+  // Look for -z threshold
+  while (i < num_samples) {
+    if ((data + i)->z < -THRESHOLD) {
+      return (true);
+    }
+
+    ++i;
+  }
+
+  return (false);
 }
 
 int main(void) {
