@@ -63,27 +63,6 @@ enum side_t flip_card(void) {
   return (current_side);
 }
 
-void next_card(void) {
-  free_card_image();
-
-  if (++current_card == NUMBER_OF_CARDS) {
-    current_card = 0;
-  }
-
-  load_card();
-}
-
-void prev_card(void) {
-  free_card_image();
-
-  if (current_card == 0) {
-    current_card = NUMBER_OF_CARDS;
-  }
-  --current_card;
-
-  load_card();
-}
-
 void rand_card(void) {
   free_card_image();
 

@@ -24,8 +24,6 @@ extern void init_cards(Window *main_window,
                        CardBack_t main_card_back);
 extern void deinit_cards(void);
 extern enum side_t flip_card(void);
-extern void next_card(void);
-extern void prev_card(void);
 extern void rand_card(void);
 
 #endif /* __CARDS_H__ */
