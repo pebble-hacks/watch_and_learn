@@ -16,13 +16,14 @@ static bool flip_detected(AccelData *data, uint32_t num_samples);
 static void tick_timer_handler(struct tm *tick_time, TimeUnits units_changed) {
   static char time_text[] = "00:00"; // Needs to be static because it's used by the system later.
   strftime(time_text, sizeof(time_text), "%R", tick_time);
-
   text_layer_set_text(time_layer, time_text);
+
   if (!(tick_time->tm_sec % NEXT_INTERVAL)) {
     rand_card();
-    text_layer_set_text_color(time_layer, GColorWhite);
-    layer_remove_from_parent((Layer*)time_layer);
-    layer_add_child(window_get_root_layer(window), (Layer*)time_layer);
+    if (get_side() == BACK) {
+      flip_card();
+      text_layer_set_text_color(time_layer, GColorWhite);
+    }
   }
 }
 

@@ -36,12 +36,18 @@ void init_cards(Window *main_window,
   image_layer_front = main_image_layer_front;
   card_back = main_card_back;
   init_card_text();
+  GRect bounds = layer_get_bounds(window_get_root_layer(window));
+  image_layer_front = bitmap_layer_create(bounds);
+  bitmap_layer_set_alignment(image_layer_front, GAlignCenter);
+  layer_add_child(window_get_root_layer(window), (Layer*)image_layer_front);
 
   load_card();
 }
 
 void deinit_cards(void) {
-  free_card_image();
+  layer_remove_child_layers(window_get_root_layer(window));
+  bitmap_layer_destroy(image_layer_front);
+  gbitmap_destroy(image_front);
   text_layer_destroy(card_back.full_name);
   text_layer_destroy(card_back.tla_name);
   text_layer_destroy(card_back.polarized);
@@ -63,9 +69,11 @@ enum side_t flip_card(void) {
   return (current_side);
 }
 
-void rand_card(void) {
-  free_card_image();
+enum side_t get_side(void) {
+  return (current_side);
+}
 
+void rand_card(void) {
   while (card_used[current_card]) {
     current_card = rand() % NUMBER_OF_CARDS;
   }
@@ -74,11 +82,6 @@ void rand_card(void) {
 }
 
 void load_card(void) {
-  // Remove the image layer from the parent
-  if (bitmap_layer_get_layer(image_layer_front)) {
-    layer_remove_from_parent((Layer*)image_layer_front);
-  }
-
   load_card_image();
   load_card_text(current_card);
   card_used[current_card] = true;
@@ -89,6 +92,8 @@ void load_card(void) {
 }
 
 void load_card_image(void) {
+  free_card_image();
+
   switch(current_card) {
   case ILE:
     image_front = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ILE_FRONT);
@@ -155,16 +160,13 @@ void load_card_image(void) {
     break;
   }
 
-  GRect bounds = layer_get_bounds(window_get_root_layer(window));
-  image_layer_front = bitmap_layer_create(bounds);
   bitmap_layer_set_bitmap(image_layer_front, image_front);
-  bitmap_layer_set_alignment(image_layer_front, GAlignCenter);
-  layer_add_child(window_get_root_layer(window), (Layer*)image_layer_front);
 }
 
 void free_card_image(void) {
-  gbitmap_destroy(image_front);
-  bitmap_layer_destroy(image_layer_front);
+  if (image_front) {
+    gbitmap_destroy(image_front);
+  }
 }
 
 void init_card_text(void) {
