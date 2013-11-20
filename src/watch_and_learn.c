@@ -74,7 +74,7 @@ static void init(void) {
 
   tick_timer_service_subscribe(SECOND_UNIT, &tick_timer_handler);
   accel_service_set_sampling_rate(ACCEL_SAMPLING_25HZ);
-  accel_data_service_subscribe(15, &accel_data_handler);
+  accel_data_service_subscribe(25, &accel_data_handler);
 }
 
 static void deinit(void) {

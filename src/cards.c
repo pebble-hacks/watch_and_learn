@@ -47,12 +47,12 @@ void init_cards(Window *main_window,
 void deinit_cards(void) {
   layer_remove_child_layers(window_get_root_layer(window));
   bitmap_layer_destroy(image_layer_front);
-  gbitmap_destroy(image_front);
   text_layer_destroy(card_back.full_name);
   text_layer_destroy(card_back.tla_name);
   text_layer_destroy(card_back.polarized);
   text_layer_destroy(card_back.func_group);
   text_layer_destroy(card_back.pKa);
+  free_card_image();
 }
 
 enum side_t flip_card(void) {
@@ -157,15 +157,23 @@ void load_card_image(void) {
     break;
   default:
     current_card = ILE;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "default hit!");
     break;
   }
 
-  bitmap_layer_set_bitmap(image_layer_front, image_front);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "current_card = %d", current_card);
+
+  if (image_front) {
+    bitmap_layer_set_bitmap(image_layer_front, image_front);
+  } else {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Unable to create bitmap resource!");
+  }
 }
 
 void free_card_image(void) {
   if (image_front) {
     gbitmap_destroy(image_front);
+    image_front = NULL;
   }
 }
 
@@ -211,6 +219,8 @@ void init_card_text(void) {
   layer_add_child(window_get_root_layer(window), (Layer*)card_back.polarized);
   layer_add_child(window_get_root_layer(window), (Layer*)card_back.func_group);
   layer_add_child(window_get_root_layer(window), (Layer*)card_back.pKa);
+
+  hide_card_text();
 }
 
 void show_card_text(void) {
